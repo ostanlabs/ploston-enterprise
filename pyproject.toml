@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ploston-enterprise"
+version = "1.0.0"
+description = "Ploston Enterprise - Premium Agent Execution Layer"
+readme = "README.md"
+license = "Proprietary"
+requires-python = ">=3.12"
+authors = [
+    { name = "Ostan Labs", email = "hello@ostanlabs.com" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "ploston-core>=1.0.0,<2.0.0",
+    "pyjwt>=2.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.2.0",
+]
+
+[project.scripts]
+ploston-enterprise-server = "ploston_enterprise.server:main"
+
+[project.urls]
+Homepage = "https://github.com/ostanlabs/ploston-enterprise"
+Documentation = "https://ostanlabs.netlify.app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ploston_enterprise"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
