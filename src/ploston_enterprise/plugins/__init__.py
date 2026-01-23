@@ -1,7 +1,7 @@
 """Enterprise plugins for Ploston Enterprise."""
 
-from .policy import PolicyPlugin
 from .patterns import PatternsPlugin
+from .policy import PolicyPlugin
 from .synthesis import SynthesisPlugin
 
 __all__ = [

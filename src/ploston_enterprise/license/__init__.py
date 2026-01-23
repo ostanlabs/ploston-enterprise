@@ -1,6 +1,6 @@
 """License validation module for Ploston Enterprise."""
 
-from .models import LicenseInfo, LicenseError
+from .models import LicenseError, LicenseInfo
 from .validator import LicenseValidator
 
 __all__ = [

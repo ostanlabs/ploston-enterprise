@@ -2,11 +2,11 @@
 
 from typing import Optional
 
+from ploston_core.extensions import FeatureFlagRegistry, PluginRegistry
 from ploston_core.extensions.capabilities import (
     Capabilities,
     CapabilitiesProvider,
 )
-from ploston_core.extensions import FeatureFlagRegistry, PluginRegistry
 
 from .license import LicenseInfo
 
