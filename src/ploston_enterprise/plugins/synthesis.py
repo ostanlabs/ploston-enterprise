@@ -27,4 +27,3 @@ class SynthesisPlugin(AELPlugin):
         """Cleanup synthesis engine on server shutdown."""
         # TODO: Cleanup synthesis engine
         pass
-

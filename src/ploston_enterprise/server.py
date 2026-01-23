@@ -54,6 +54,7 @@ def _validate_license_and_setup():
 
     # Set enterprise capabilities provider
     from . import __version__
+
     provider = EnterpriseCapabilitiesProvider(license_info, __version__)
     set_capabilities_provider(provider)
 
@@ -125,4 +126,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

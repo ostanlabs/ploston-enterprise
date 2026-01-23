@@ -56,4 +56,3 @@ class EnterpriseCapabilitiesProvider(CapabilitiesProvider):
             },
             license=license_dict,
         )
-

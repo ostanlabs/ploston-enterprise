@@ -32,4 +32,3 @@ class PatternsPlugin(AELPlugin):
         """Analyze workflow execution for patterns."""
         # TODO: Implement pattern analysis
         pass
-

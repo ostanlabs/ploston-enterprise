@@ -101,4 +101,3 @@ class LicenseValidator:
             f.write(instance_id)
 
         return instance_id
-

@@ -27,12 +27,10 @@ def get_enterprise_feature_flags(license_info: "LicenseInfo") -> FeatureFlags:
         workflows=True,
         mcp=True,
         rest_api=True,
-
         # Premium features (enabled based on license)
         policy="policy" in license_info.features,
         patterns="patterns" in license_info.features,
         synthesis="synthesis" in license_info.features,
-
         # Enterprise limits
         max_concurrent_workflows=100,
         max_workflow_steps=1000,
@@ -46,14 +44,11 @@ ENTERPRISE_FEATURE_FLAGS = FeatureFlags(
     workflows=True,
     mcp=True,
     rest_api=True,
-
     # Premium features (enabled)
     policy=True,
     patterns=True,
     synthesis=True,
-
     # Enterprise limits
     max_concurrent_workflows=100,
     max_workflow_steps=1000,
 )
-

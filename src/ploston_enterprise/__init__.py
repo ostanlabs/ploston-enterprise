@@ -8,4 +8,3 @@ This package provides enterprise features including:
 """
 
 __version__ = "1.0.0"
-
