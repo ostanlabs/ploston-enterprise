@@ -8,11 +8,13 @@ import asyncio
 import os
 from typing import Optional
 
+from ploston_core import PlostApplication
 from ploston_core.extensions import (
     FeatureFlagRegistry,
     set_capabilities_provider,
 )
 from ploston_core.mcp_frontend import MCPFrontend, MCPServerConfig
+from ploston_core.types import MCPTransport
 
 from .capabilities import EnterpriseCapabilitiesProvider
 from .defaults import get_enterprise_feature_flags
@@ -39,7 +41,7 @@ def _validate_license_and_setup():
             file_path=license_file,
         )
     except LicenseError as e:
-        print(f"Error: {e.message}")
+        print(f"[Ploston Enterprise] Error: {e.message}")
         print("")
         print("Options:")
         print("  1. Renew license: Contact sales@ostanlabs.com")
@@ -61,67 +63,93 @@ def _validate_license_and_setup():
     return license_info
 
 
-def create_server(config_path: Optional[str] = None) -> MCPFrontend:
+async def create_server(
+    config_path: Optional[str] = None,
+    host: str = "0.0.0.0",
+    port: int = 8080,
+    with_rest_api: bool = True,
+) -> PlostApplication:
     """Create Enterprise server with license validation.
 
     Args:
         config_path: Optional path to configuration file.
+        host: HTTP host (default: 0.0.0.0)
+        port: HTTP port (default: 8080)
+        with_rest_api: Enable REST API alongside MCP (default: True)
 
     Returns:
-        Configured MCPFrontend server instance.
+        Configured PlostApplication instance (initialized).
 
     Raises:
         SystemExit: If license validation fails.
     """
     _validate_license_and_setup()
-    config = MCPServerConfig()
-    return MCPFrontend(config)
 
-
-def create_server_with_config(
-    config_path: Optional[str], server_config: MCPServerConfig
-) -> MCPFrontend:
-    """Create Enterprise server with custom config and license validation.
-
-    Args:
-        config_path: Optional path to configuration file.
-        server_config: Server configuration to use.
-
-    Returns:
-        Configured MCPFrontend server instance.
-
-    Raises:
-        SystemExit: If license validation fails.
-    """
-    _validate_license_and_setup()
-    return MCPFrontend(server_config)
+    # Create application with full component initialization
+    app = PlostApplication(
+        config_path=config_path,
+        transport=MCPTransport.HTTP,
+        http_host=host,
+        http_port=port,
+        with_rest_api=with_rest_api,
+        rest_api_prefix="/api/v1",
+        rest_api_docs=True,
+    )
+    await app.initialize()
+    return app
 
 
 def main():
     """CLI entrypoint for ploston-enterprise-server."""
     import argparse
 
-    from ploston_core.config import MCPHTTPConfig
-    from ploston_core.types import MCPTransport
-
     parser = argparse.ArgumentParser(description="Ploston Enterprise Server")
     parser.add_argument("-c", "--config", help="Config file path")
-    parser.add_argument("-p", "--port", type=int, default=8080)
-    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("-p", "--port", type=int, default=8080, help="HTTP port")
+    parser.add_argument("--host", default="0.0.0.0", help="HTTP host")
+    parser.add_argument(
+        "--no-rest", action="store_true", help="Disable REST API (MCP only)"
+    )
     args = parser.parse_args()
 
-    # Create HTTP config from CLI args
-    http_config = MCPHTTPConfig(host=args.host, port=args.port)
+    # Validate license first (exits if invalid)
+    license_info = _validate_license_and_setup()
 
-    # Create server with HTTP transport
-    config = MCPServerConfig(
-        transport=MCPTransport.HTTP,
-        http=http_config,
-    )
+    async def run_server():
+        """Run the server with full initialization."""
+        app = PlostApplication(
+            config_path=args.config,
+            transport=MCPTransport.HTTP,
+            http_host=args.host,
+            http_port=args.port,
+            with_rest_api=not args.no_rest,
+            rest_api_prefix="/api/v1",
+            rest_api_docs=True,
+        )
 
-    # Validate license and set up enterprise features
-    server = create_server_with_config(args.config, config)
-    asyncio.run(server.start())
+        mode = "dual-mode (MCP + REST)" if not args.no_rest else "MCP only"
+        print(
+            f"[Ploston Enterprise] Starting server on http://{args.host}:{args.port} ({mode})",
+            flush=True,
+        )
+        print(
+            f"[Ploston Enterprise] License: {license_info.tier} (expires: {license_info.expires_at})",
+            flush=True,
+        )
+
+        try:
+            await app.initialize()
+            print("[Ploston Enterprise] Server initialized successfully", flush=True)
+            await app.start()
+        except KeyboardInterrupt:
+            print("\n[Ploston Enterprise] Shutting down...", flush=True)
+            await app.shutdown()
+        except Exception as e:
+            print(f"[Ploston Enterprise] Error: {e}", flush=True)
+            await app.shutdown()
+            raise
+
+    asyncio.run(run_server())
 
 
 if __name__ == "__main__":
