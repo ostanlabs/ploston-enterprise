@@ -13,7 +13,6 @@ from ploston_core.extensions import (
     FeatureFlagRegistry,
     set_capabilities_provider,
 )
-from ploston_core.mcp_frontend import MCPFrontend, MCPServerConfig
 from ploston_core.types import MCPTransport
 
 from .capabilities import EnterpriseCapabilitiesProvider
@@ -107,9 +106,7 @@ def main():
     parser.add_argument("-c", "--config", help="Config file path")
     parser.add_argument("-p", "--port", type=int, default=8080, help="HTTP port")
     parser.add_argument("--host", default="0.0.0.0", help="HTTP host")
-    parser.add_argument(
-        "--no-rest", action="store_true", help="Disable REST API (MCP only)"
-    )
+    parser.add_argument("--no-rest", action="store_true", help="Disable REST API (MCP only)")
     args = parser.parse_args()
 
     # Validate license first (exits if invalid)

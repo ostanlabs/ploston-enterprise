@@ -33,7 +33,7 @@ def server_port() -> int:
 @pytest.fixture
 def mock_license_key():
     """Provide a mock license key for testing.
-    
+
     In real tests, this would be a valid test license.
     For smoke tests, we test the failure path without a license.
     """
@@ -49,7 +49,7 @@ class TestEnterpriseServerWithoutLicense:
         env = os.environ.copy()
         env.pop("PLOSTON_LICENSE_KEY", None)
         env.pop("PLOSTON_LICENSE_FILE", None)
-        
+
         process = subprocess.Popen(
             [
                 sys.executable,
@@ -65,12 +65,12 @@ class TestEnterpriseServerWithoutLicense:
             text=True,
             env=env,
         )
-        
+
         # Server should exit with error code
         try:
             return_code = process.wait(timeout=10)
             assert return_code != 0, "Server should exit with error without license"
-            
+
             stdout, stderr = process.communicate(timeout=5)
             # Should mention license error
             output = stdout + stderr
@@ -82,11 +82,11 @@ class TestEnterpriseServerWithoutLicense:
 
 @pytest.mark.skipif(
     not os.environ.get("PLOSTON_LICENSE_KEY") and not os.environ.get("PLOSTON_LICENSE_FILE"),
-    reason="Requires valid license key or file"
+    reason="Requires valid license key or file",
 )
 class TestEnterpriseServerWithLicense:
     """Test enterprise server with a valid license.
-    
+
     These tests only run when a valid license is available.
     """
 
@@ -107,11 +107,11 @@ class TestEnterpriseServerWithLicense:
             stderr=subprocess.PIPE,
             text=True,
         )
-        
+
         # Wait for server to be ready
         start_time = time.time()
         server_ready = False
-        
+
         while time.time() - start_time < 10:
             try:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -123,14 +123,14 @@ class TestEnterpriseServerWithLicense:
             except Exception:
                 pass
             time.sleep(0.1)
-        
+
         if not server_ready:
             process.kill()
             stdout, stderr = process.communicate(timeout=5)
             pytest.fail(f"Server failed to start.\nstdout: {stdout}\nstderr: {stderr}")
-        
+
         yield process
-        
+
         process.terminate()
         try:
             process.wait(timeout=5)
