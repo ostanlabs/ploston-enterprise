@@ -1,7 +1,7 @@
 """License models for Ploston Enterprise."""
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -17,11 +17,11 @@ class LicenseInfo:
 
     def is_expired(self) -> bool:
         """Check if the license has expired."""
-        return datetime.utcnow() > self.expires
+        return datetime.now(UTC) > self.expires
 
     def days_until_expiry(self) -> int:
         """Get the number of days until license expiry."""
-        delta = self.expires - datetime.utcnow()
+        delta = self.expires - datetime.now(UTC)
         return max(0, delta.days)
 
 
